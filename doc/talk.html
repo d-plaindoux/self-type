@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<head>
+    <meta charset="utf-8">
+
+    <title> Typage dynamique de l'objet courant </title>
+
+    <meta name="description" content="Dynamic typing of the current object">
+    <meta name="author" content="Didier Plaindoux">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/league.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <style>
+
+        .img-circle {
+            border-radius: 50%;
+        }
+
+        .keyword {
+            color: #FF9900;
+            background-color: #555a5f;
+            padding: 5px 5px 5px 5px !important;
+        }
+
+        .remark {
+            color: white;
+            text-align: center !important;
+            background-color: #42663f;
+            padding: 5px 5px 5px 5px !important;
+            Box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        .warning {
+            color: white;
+            text-align: center !important;
+            background-color: #6a1520;
+            padding: 5px 5px 5px 5px !important;
+            Box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.4);
+        }
+
+    </style>
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+</head>
+
+<body>
+<div class="reveal pages">
+
+    <div class="slides">
+
+        <!-- ####################### -->
+
+        <section>
+            <h3> Typage dynamique de l'objet courant </h3>
+            <img width="50%" class="plain" src="images/logo_color_text.png"> </br>
+            <p> September 2020 </p>
+            <p><img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/photo.png">
+                &nbsp; <a style="font-size:30px" href="http://twitter.com/dplaindoux">@dplaindoux</a></p>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Cas de l'héritage et de l'objet courant </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface Point {
+  var x: Int; var y: Int
+
+  fun move(dx: Int, dy: Int): Point {
+    this.x += dx; this.y += dy; return this
+  }
+ }
+      </code></pre>
+
+            <p class="fragment remark" style="font-size: 70%"> Affaiblissement du type de this à Point dans la fonction <tt>move</tt> ! </p>
+
+        </section>
+
+        <section>
+
+            <p style="font-size: 80%">
+                A propos de l'usage de l'objet courant dans les expressions et <br>
+                son type dynamique associé dans les signatures
+            </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h2> Part I </h2>
+
+            <h3>Langages sans le type de l'objet courant </h3>
+
+            <p> Etude de cas en Kotlin </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Spécification récursive de Point </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface Point {
+  val x: Int; val y: Int
+
+  <span class="fragment">fun new(x: Int, y: Int): Point // Approche immutable</span>
+  <span class="fragment">fun move(dx: Int, dy: Int): Point = new(x + dx, y + dy)</span>
+  <span class="fragment">fun equal(p: Point): Boolean = p.x == x && p.y == y</span>
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Spécification ouverte de Point </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface Point&lt;Self> {
+  val x: Int; val y: Int
+
+  fun new(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun equal(p: Self): Boolean = ???
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Spécification ouverte de Point </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface Point&lt;Self : Point&lt;???>> {
+  val x: Int; val y: Int
+
+  fun new(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun equal(p: Self): Boolean = p.x == x && p.y == y
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Spécification ouverte de Point </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface Point&lt;Self : Point&lt;Self>> {
+  val x: Int; val y: Int
+
+  fun new(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun equal(p: Self): Boolean = p.x == x && p.y == y
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Construction récursive de la classe YPoint </h4>
+
+            <pre><code data-noescape sclass="kotlin">
+ final class YPoint(
+   override val x: Int,
+   override val y: Int
+ ) : Point&lt;YPoint> {
+
+  override fun new(x: Int, y: Int): YPoint = YPoint(x, y)
+
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Spécification ouverte de PointColore </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface PointColore&lt;Self : PointColore&lt;Self>> : Point&lt;Self> {
+  val c: Int
+
+  <span class="fragment">override fun equal(s: Self) = s.x == x && super.equal(s)</span>
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Construction récursive de la classe YPointColore ? </h4>
+
+            <pre><code data-noescape class="kotlin">
+ final class YPointColore(
+   override val x: Int,
+   override val y: Int,
+   override val c: Int
+ ) : <span class="keyword">YPoint(x,y),</span> PointColore&lt;YPointColore> {
+
+  override fun new(x: Int, y: Int) = YPointColore(x, y, c)
+
+ }
+      </code></pre>
+
+            <p style="font-size: 70%" class="warning fragment">
+                <tt>YPointColore</tt> ne peut hériter de <tt>YPoint</tt> <br>
+                Ne peut implémenter Point&lt;YPoint> et Point&lt;YPointColore>
+            </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Construction récursive de la classe YPointColore </h4>
+
+            <pre><code data-noescape class="kotlin">
+ final class YPointColore(
+   override val x: Int,
+   override val y: Int,
+   override val c: Int
+ ) : PointColore&lt;YPointColore> {
+
+  override fun new(x: Int, y: Int) = YPointColore(x, y, c)
+
+ }
+      </code></pre>
+
+            <p style="font-size: 70%" class="fragment remark"><tt>YPoint est un sous type de Point&lt;YPoint></tt>
+                <br> <tt>YPointColore est un sous type Point&lt;YPointColore></tt></p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Usages </h4>
+
+            <pre><code data-noescape class="kotlin">
+ fun &lt;P : Point&lt;P>> List&lt;P>.move(dx: Int, dy: Int) = this.map {
+   it.move(dx, dy)
+ }
+
+ <span class="fragment">fun main() {
+    val p  = YPoint(0, 0)
+    val cp = YPointColore(0, 0, 0)
+
+    <span class="fragment">val l : List&lt;YPointColore> = listOf(cp).move(1,2)</span>
+
+    <span class="fragment">cp.equal(p) &#x274C; // YPoint &nle; YPointColore</span>
+    <span class="fragment">p.equal(cp) &#x274C; // YPointColore &nle; YPoint</span>
+ }</span>
+      </code></pre>
+
+            <p style="font-size: 70%" class="warning fragment"> Pas de relation <b>explicite</b> entre
+                <tt>YPointColore</tt> et <tt>YPoint</tt></p>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <p style="font-size: 70%"><code class="kotlin">interface Point&lt;Self: Point&lt;Self>> { ... }</code></p>
+
+            <img class="fragment" src="images/F-Bounded.png" width="60%">
+
+            <p style="font-size: 70%" class="fragment remark"> &forall; t &subseteq; F[t].&sigma; </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Cas du sous typage ... des types fonctionnels </h4>
+
+            <img class="fragment" src="images/subtype-fun.png" width="60%">
+
+            <p style="font-size: 70%" class="fragment remark"> Contravariance du paramètre et covariance du
+                résultat </p>
+
+            <ul>
+                <li style="font-size: 70%" class="fragment"> On Understanding Types, Data Abstraction, and Polymorphism
+                    <br>L. Cardelli et P. Wegner (1985)
+                </li>
+                <li style="font-size: 70%" class="fragment"> Liskov substitution principle
+                    <br>B. Liskov (1987)
+                </li>
+                <li style="font-size: 70%" class="fragment"> Inheritance is not Subtyping
+                    <br>W. Cook, W. Hill et P. Canning (1990)
+                </li>
+            </ul>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Kotlin :: Retour sur PointColore et equal </h4>
+
+            <pre><code data-noescape class="kotlin">
+ interface PointColore&lt;Self : PointColore&lt;Self>> : Point&lt;Self> {
+   val c: Int
+
+   <span class="keyword">override</span> fun equal(s: Self) = s.x == x && super.equal(s)
+ }
+      </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Sous typage: nominal vs. structurel</h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h2> Part II </h2>
+
+            <h3> Langages avec le type de l'objet courant </h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Like Current in Eiffel </h3>
+
+            <p class="fragment" style="font-size:70%"> Redéfinition par covariance des paramètres acceptée </p>
+            <p class="fragment" style="font-size:70%"> Problématique des "catcalls" (Changed Availability or Type) </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Self type in Swift </h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h3><span style="text-transform: lowercase;">self</span> : <span
+                    style="text-transform: capitalize;">Self</span></h3>
+
+            <pre><code data-noescape class="swift">
+  class Counter {
+    var value:Int
+
+    init(_ value:Int = 0) {
+      self.value = value
+    }
+
+    <span class="fragment">func increment() -> Self {
+      self.value += 1
+      <span class="fragment">return self // Mutation ...</span>
+    }</span>
+  }
+          </code></pre>
+
+            <div class="remark fragment" style="font-size:70%">
+                Self is the type of the current instance i.e. self ...
+            </div>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h3> a new ... <span style="text-transform: capitalize;">Self</span></h3>
+
+            <pre><code data-noescape class="swift">
+  class Counter {
+    let value:Int
+
+    <span class="fragment">func increment() -> Self {
+      return <span class="fragment"><span class="fragment">type(of:self).</span>init</span>(self.value + 1) <span
+                class="fragment">// Immutable </span>
+    }</span>
+
+    <span class="fragment"><span class="fragment">required</span> init(_ value:Int = 0) {
+      self.value = value
+    }</span>
+  }
+          </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Swift :: Point and PointColore </h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Swift :: Spécification du protocol Point </h4>
+
+            <pre><code data-noescape class="swift">
+  protocol Point {
+    var x : Int { get }
+    var y : Int { get }
+
+    func equal(p:Self) -> Bool
+    func move(dx: Int, dy: Int) -> Self
+
+    <span class="fragment">init(x: Int, y:Int) // Spécification du constructeur</span>
+  }
+    </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Swift :: Extension du protocol Point </h4>
+
+            <pre><code data-noescape class="swift">
+  extension Point {
+    func equal(p:Self) -> Bool {
+      return x == p.x && y == p.y
+    }
+
+    func move(dx: Int, dy: Int) -> Self {
+      return type(of: self).init(x: x + dx, y : y + dy)
+    }
+  }
+    </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Swift :: Spécification du protocol PointColore </h4>
+
+            <pre><code data-noescape class="swift">
+  protocol PointColore <span class="fragment">where Self: Point</span> {
+    var c : Int { get }
+  }
+
+  extension PointColore {
+    func equal(p:Self) -> Bool {
+      return c == p.c && x == p.x && y == p.y
+    }
+  }
+    </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Swift :: Implémentations de Point et PointColore </h4>
+
+            <pre><code data-noescape class="swift">
+  class YPoint : Point {
+    let x: Int; let y: Int
+
+    required init(x: Int, y:Int) { self.x = x; self.y = y }
+  }
+</code></pre>
+            <pre><code data-noescape class="swift">
+  class YPointColore : <span class="fragment">YPoint,</span> PointColore {
+    let c : Int
+
+    required init(x: Int, y: Int) {
+      self.c = 0<span class="fragment">; super.init(x: x, y: y)</span>
+    }
+  }
+    </code></pre>
+
+            <p style="font-size: 70%" class="remark fragment"> Relation <b>explicite</b> entre
+                <tt>YPointColore</tt> et <tt>YPoint</tt></p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Swift :: Usages ... </h4>
+
+            <pre><code data-noescape class="swift">
+  func main() {
+    let p  = YPoint(x: 0, y: 0)
+    let pc = YPointColore(x: 0, y: 0)
+
+    <span class="fragment">let _ = pc.equal(p: p) &#x274C; // Cannot convert value ...</span>
+    <span class="fragment">let _ = p.equal(p: pc) // Appel equal de Point </span>
+
+    <span class="fragment">let _ = [p, pc].map { e in e.move(dx: 1, dy: 2) }</span>
+  }
+    </code></pre>
+
+            <p style="font-size: 70%" class="remark fragment"> Pas de redéfinition mais deux définitions distinctes de
+                <tt>equal</tt></p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Self type in Rust </h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h3> Trait définition </h3>
+
+            <pre><code data-noescape class="Rust">
+  trait Monoid {
+    <span class="fragment">fn neutral() -> Self;</span>
+
+    <span class="fragment">fn add(&self, s: &Self) -> Self;</span>
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h3> Trait implementation </h3>
+
+            <pre><code data-noescape class="Rust">
+  impl Monoid for <span class="fragment" data-fragment-index="1">i32</span> {
+    <span class="fragment" data-fragment-index="2">fn neutral() -> Self { // Self &equiv; i32
+        0
+    }</span>
+
+    <span class="fragment" data-fragment-index="3">fn add(&self, p: &Self) -> Self {
+        self + p
+    }</span>
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Rust :: Point and PointColore </h3>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Spécification du trait Point </h4>
+
+            <pre><code data-noescape class="Rust">
+  trait Point {
+    fn x(&self) -> u32;
+    fn y(&self) -> u32;
+
+    <span class="fragment">fn init(&self, x: u32, y: u32) -> Self;</span>
+    <span class="fragment">fn move_it(&self, dx: u32, dy: u32) -> Self
+      where Self: std::marker::Sized {
+      self.init(self.x() + dx, self.y() + dy)
+    }</span>
+    <span class="fragment">fn equal(&self, p: &Self) -> bool {
+      self.x() == p.x() && self.y() == p.y()
+    }</span>
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Spécification du trait PointColore </h4>
+
+            <pre><code data-noescape class="Rust">
+  trait PointColore <span class="fragment">where Self: Point</span> {
+    fn c(&self) -> u32;
+
+    fn equal(&self, p: &Self) -> bool {
+      self.c() == p.c() <span class="fragment">&& Point::equal(self, p)</span>
+    }
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Définition et implementation de Point </h4>
+
+            <pre><code data-noescape class="Rust">
+  struct YPoint { x: u32, y: u32 }
+
+  impl Point for YPoint {
+    fn x(&self) -> u32 { self.x }
+    fn y(&self) -> u32 { self.y }
+
+    fn new(&self, x: u32, y: u32) -> Self {
+      YPoint { x, y }
+    }
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Définition et implementation de PointColore </h4>
+
+            <pre><code data-noescape class="Rust">
+  struct YPointColore { p: YPoint, c: u32 }
+
+  impl Point for YPointColore {
+    fn x(&self) -> u32 { self.p.x }
+    fn y(&self) -> u32 { self.p.x }
+    fn new(&self, x: u32, y: u32) -> Self {
+      YPointColore { p: YPoint { x, y }, c: self.c() }
+    }
+  }
+
+  impl PointColore for YPointColore {
+    fn c(&self) -> u32 { self.c }
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Usages ... </h4>
+
+            <pre><code data-noescape class="Rust">
+  fn main() {
+    let p1 = YPointColore { p: YPoint { x: 0, y: 0 }, c: 0 };
+    let p2 = p1.move_it(0, 0);
+
+    <span class="fragment">let _ = p1.equal(&p2); &#x274C; // "Multiple applicable items ..."</span>
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Rust :: Usages ... </h4>
+
+            <pre><code data-noescape class="Rust">
+  fn main() {
+    let p1 = YPointColore { p: YPoint { x: 0, y: 0 }, c: 0 };
+    let p2 = p1.move_it(0, 0);
+
+    let _ = PointColore::equal(&p1, &p2);
+  }
+            </code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Self type in OCaml </h3>
+
+            <p><tt>object (self : ’self) ··· end</tt></p>
+
+            <p><tt>a :> b</tt></p>
+
+            <p class="fragment remark"> Structural subtyping </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> OCaml :: Définition de la classe point </h4>
+
+            <pre><code data-noescape class="OCaml">
+  class point (x:int) (y:int) =
+    object (self:'self)
+      val x = x
+      val y = y
+      method x = x
+      method y = y
+
+      method init x y = {< x = x ; y = y >}
+      method move dx dy = self#init (x + dx) (y + dy)
+      method equal (p:'self) = x = p#x && y = p#y
+    end
+            </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> OCaml :: Définition de la classe PointColore </h4>
+
+            <pre><code data-noescape class="OCaml">
+  class point_colore (x:int) (y:int) (c:int) =
+    object (self:'self)
+      inherit point x y as super
+
+      val c = c
+      method c = c
+
+      method init x y = {< x = x ; y = y; c = c >}
+      method equal (p:'self) = c = p#c && super#equal p
+    end
+            </code></pre>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> OCaml :: Usages ... </h4>
+
+            <pre><code data-noescape class="OCaml">
+  let p  = new point 1 2
+  let pc = new point_colore 1 2 3
+  <span class="fragment">let _  = (pc :> p) &#x274C; (* point &nleq; point_colore *)</span>
+            </code></pre>
+
+            <p style="font-size: 70%" class="remark fragment"> Sous typage structurel </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Conclusion </h3>
+
+            <ul>
+                <li class="fragment" style="font-size: 70%"> Sous typage Nominal et héritage <br>
+                    Relâchement au niveau formel concernant la contravariance <br>
+                    Limitation dans l'usage du type de self dans le code <br>
+                    Augmentation de l'ensemble des expressions (cf. Swift)
+                    <br><br>
+                </li>
+                <li class="fragment" style="font-size: 70%"> Sous typage structurel et héritage <br>
+                    Repose sur le modèle formel <br>
+                    Aucune limitation dans l'usage <br>
+                    Un point coloré n'est pas un point DOT
+                </li>
+            </ul>
+
+            <br><br>
+
+            <p style="font-size: 70%" class="remark fragment"> Héritage vs. Composition </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Références </h3>
+
+            TODO
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <h3> Dynamic typing of the current object </h3>
+            <br>
+            <p><img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/photo.png">
+                &nbsp; <a style="font-size:30px" href="http://twitter.com/dplaindoux">@dplaindoux</a></p>
+        </section>
+
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Self type in Scala </h3>
+
+            <p class="fragment"> "Self-types are a way to declare that a trait must be mixed into another trait" </p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+<pre><code class="scala">
+  trait C { self: T =>
+    ...
+  }
+
+</code></pre>
+
+            <ul>
+                <li style="font-size: 70%" class="fragment"> Restrict the type of this to a proper subtype of the
+                    current class
+                </li>
+                <li style="font-size: 70%" class="fragment"> Introduce an alias name for <tt>this</tt></li>
+            </ul>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+<pre><code data-noescape class="scala">
+  trait Point[T <: Point[T]] { <span class="fragment">this: T =></span>
+    val x, y: Int
+
+    def init(x: Int, y: Int): T
+    def move(dx: Int, dy: Int) = init(x + dx, y + dy)
+    def equal(p: T) = x == p.x && y == p.y
+  }
+</code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+<pre><code class="scala">
+  trait PointColore[T <: PointColore[T]] extends Point[T] {
+                         this: T=>
+
+    val c: Int
+
+    override def equal(p: T) = c == p.c && super.equal(p)
+  }
+
+</code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+<pre><code class="scala">
+  case class YPoint(x: Int, y: Int)
+    extends Point[YPoint] {
+
+    override def init(x: Int, y: Int): YPoint =
+      new YPoint(x, y)
+  }
+
+</code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+<pre><code class="scala">
+  case class YPointColore(x: Int, y: Int, c: Int)
+    extends PointColore[YPointColore] {
+
+    override def init(x: Int, y: Int): YPointColore =
+      new YPointColore(x, y, c)
+  }
+
+</code></pre>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+            <pre><code class="scala">
+  def equal[P <: Point[P]] (p1: P, p2: P)=p1.equal(p2)
+      </code></pre>
+
+            <p style="font-size: 70%" class="fragment remark"><tt>YPoint &le; Point[YPoint]</tt></p>
+            <p style="font-size: 70%" class="fragment remark"><tt>YPointColore &le; Point[YPointColore]</tt></p>
+            <p style="font-size: 70%" class="warning fragment"> No <b>explicit</b> relationship between
+                <tt>YPointColore</tt> and <tt>YPoint</tt></p>
+        </section>
+
+        <!-- ####################### -->
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="plugin/mermaid/mermaid.full.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <link rel="stylesheet" href="plugin/css/mermaid.css">
+
+        <script>
+            // More info https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: false,
+                progress: true,
+                history: true,
+                center: true,
+                slideNumber: true,
+                transition: 'fade', // none/fade/slide/convex/concave/zoom
+
+                // More info https://github.com/hakimel/reveal.js#dependencies
+                dependencies: [
+                    {
+                        src: 'lib/js/classList.js', condition: function () {
+                            return !document.body.classList;
+                        }
+                    },
+                    {
+                        src: 'plugin/markdown/marked.js', condition: function () {
+                            return !!document.querySelector('[data-markdown]');
+                        }
+                    },
+                    {
+                        src: 'plugin/markdown/markdown.js', condition: function () {
+                            return !!document.querySelector('[data-markdown]');
+                        }
+                    },
+                    {
+                        src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                            hljs.initHighlightingOnLoad();
+                        }
+                    },
+                    {src: 'plugin/zoom-js/zoom.js', async: true},
+                    {src: 'plugin/notes/notes.js', async: true}
+                ]
+            });
+        </script>
+</body>
+</html>

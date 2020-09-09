@@ -80,8 +80,27 @@
         <!-- ####################### -->
 
         <section>
+            <h3> Remerciements </h3>
 
-            <h4> Cas de l'héritage et de l'objet courant </h4>
+            <p style="font-size:70%">
+                <img style="vertical-align: middle;" class="plain" width="35%" src="images/logo_color_text.png">
+            </p>
+
+            <p style="font-size:70%">
+                <img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/xavier.png">
+                Xavier Van de Woestyne </p>
+
+            <p style="font-size:70%">
+                <img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/alessio.jpeg">
+                Alessio Coltellacci</p>
+
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h4> Pourquoi le typage dynamique de l'objet courant ? </h4>
 
             <pre><code data-noescape class="kotlin">
  interface Point {
@@ -93,7 +112,19 @@
  }
       </code></pre>
 
-            <p class="fragment remark" style="font-size: 70%"> Affaiblissement du type de this à Point dans la fonction <tt>move</tt> ! </p>
+            <ul>
+                <li class="fragment" style="font-size: 70%"> Affaiblissement du type de <code>this</code> à
+                    <code>Point</code> dans la fonction <code>move</code> !
+                </li>
+
+                <li class="fragment" style="font-size: 70%"> Approche objet immutable en présence d'héritage
+                    problématique !
+                </li>
+
+                <li class="fragment" style="font-size: 70%"> Rendre le type de <code>this</code> explicite aide t'il à
+                    régler ce problème ?
+                </li>
+            </ul>
 
         </section>
 
@@ -127,8 +158,8 @@
  interface Point {
   val x: Int; val y: Int
 
-  <span class="fragment">fun new(x: Int, y: Int): Point // Approche immutable</span>
-  <span class="fragment">fun move(dx: Int, dy: Int): Point = new(x + dx, y + dy)</span>
+  <span class="fragment">fun init(x: Int, y: Int): Point // Approche immutable</span>
+  <span class="fragment">fun move(dx: Int, dy: Int): Point = init(x + dx, y + dy)</span>
   <span class="fragment">fun equal(p: Point): Boolean = p.x == x && p.y == y</span>
  }
       </code></pre>
@@ -144,8 +175,8 @@
  interface Point&lt;Self> {
   val x: Int; val y: Int
 
-  fun new(x: Int, y: Int): Self
-  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun init(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = init(x + dx, y + dy)
   fun equal(p: Self): Boolean = ???
  }
       </code></pre>
@@ -161,8 +192,8 @@
  interface Point&lt;Self : Point&lt;???>> {
   val x: Int; val y: Int
 
-  fun new(x: Int, y: Int): Self
-  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun init(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = init(x + dx, y + dy)
   fun equal(p: Self): Boolean = p.x == x && p.y == y
  }
       </code></pre>
@@ -178,8 +209,8 @@
  interface Point&lt;Self : Point&lt;Self>> {
   val x: Int; val y: Int
 
-  fun new(x: Int, y: Int): Self
-  fun move(dx: Int, dy: Int): Self = new(x + dx, y + dy)
+  fun init(x: Int, y: Int): Self
+  fun move(dx: Int, dy: Int): Self = init(x + dx, y + dy)
   fun equal(p: Self): Boolean = p.x == x && p.y == y
  }
       </code></pre>
@@ -197,7 +228,7 @@
    override val y: Int
  ) : Point&lt;YPoint> {
 
-  override fun new(x: Int, y: Int): YPoint = YPoint(x, y)
+  override fun init(x: Int, y: Int): YPoint = YPoint(x, y)
 
  }
       </code></pre>
@@ -213,9 +244,12 @@
  interface PointColore&lt;Self : PointColore&lt;Self>> : Point&lt;Self> {
   val c: Int
 
-  <span class="fragment">override fun equal(s: Self) = s.x == x && super.equal(s)</span>
+  <span class="fragment"><span class="keyword">override</span> fun equal(s: Self) = s.c == c && super.equal(s)</span>
  }
       </code></pre>
+
+            <p style="font-size: 70%" class="fragment remark"> La méthode <code>equal</code> est redéfinie dans PointColore </p>
+
         </section>
 
         <!-- ####################### -->
@@ -231,7 +265,7 @@
    override val c: Int
  ) : <span class="keyword">YPoint(x,y),</span> PointColore&lt;YPointColore> {
 
-  override fun new(x: Int, y: Int) = YPointColore(x, y, c)
+  override fun init(x: Int, y: Int) = YPointColore(x, y, 0)
 
  }
       </code></pre>
@@ -256,7 +290,7 @@
    override val c: Int
  ) : PointColore&lt;YPointColore> {
 
-  override fun new(x: Int, y: Int) = YPointColore(x, y, c)
+  override fun init(x: Int, y: Int) = YPointColore(x, y, 0)
 
  }
       </code></pre>
@@ -300,55 +334,7 @@
 
             <img class="fragment" src="images/F-Bounded.png" width="60%">
 
-            <p style="font-size: 70%" class="fragment remark"> &forall; t &subseteq; F[t].&sigma; </p>
-
-        </section>
-
-        <!-- ####################### -->
-
-        <section>
-
-            <h4> Cas du sous typage ... des types fonctionnels </h4>
-
-            <img class="fragment" src="images/subtype-fun.png" width="60%">
-
-            <p style="font-size: 70%" class="fragment remark"> Contravariance du paramètre et covariance du
-                résultat </p>
-
-            <ul>
-                <li style="font-size: 70%" class="fragment"> On Understanding Types, Data Abstraction, and Polymorphism
-                    <br>L. Cardelli et P. Wegner (1985)
-                </li>
-                <li style="font-size: 70%" class="fragment"> Liskov substitution principle
-                    <br>B. Liskov (1987)
-                </li>
-                <li style="font-size: 70%" class="fragment"> Inheritance is not Subtyping
-                    <br>W. Cook, W. Hill et P. Canning (1990)
-                </li>
-            </ul>
-
-        </section>
-
-        <!-- ####################### -->
-
-        <section>
-
-            <h4> Kotlin :: Retour sur PointColore et equal </h4>
-
-            <pre><code data-noescape class="kotlin">
- interface PointColore&lt;Self : PointColore&lt;Self>> : Point&lt;Self> {
-   val c: Int
-
-   <span class="keyword">override</span> fun equal(s: Self) = s.x == x && super.equal(s)
- }
-      </code></pre>
-        </section>
-
-        <!-- ####################### -->
-
-        <section>
-
-            <h3> Sous typage: nominal vs. structurel</h3>
+            <p style="font-size: 70%" class="fragment remark"> Simulation du type dynamique de l'objet courant ! </p>
 
         </section>
 
@@ -449,8 +435,8 @@
     var x : Int { get }
     var y : Int { get }
 
-    func equal(p:Self) -> Bool
     func move(dx: Int, dy: Int) -> Self
+    func equal(p:Self) -> Bool
 
     <span class="fragment">init(x: Int, y:Int) // Spécification du constructeur</span>
   }
@@ -466,12 +452,12 @@
 
             <pre><code data-noescape class="swift">
   extension Point {
-    func equal(p:Self) -> Bool {
-      return x == p.x && y == p.y
-    }
-
     func move(dx: Int, dy: Int) -> Self {
       return type(of: self).init(x: x + dx, y : y + dy)
+    }
+
+    func equal(p:Self) -> Bool {
+      return x == p.x && y == p.y
     }
   }
     </code></pre>
@@ -545,7 +531,7 @@
     </code></pre>
 
             <p style="font-size: 70%" class="remark fragment"> Pas de redéfinition mais deux définitions distinctes de
-                <tt>equal</tt></p>
+                <code>equal</code></p>
 
         </section>
 
@@ -566,7 +552,7 @@
   trait Monoid {
     <span class="fragment">fn neutral() -> Self;</span>
 
-    <span class="fragment">fn add(&self, s: &Self) -> Self;</span>
+    <span class="fragment">fn combine(&self, s: &Self) -> Self;</span>
   }
             </code></pre>
 
@@ -583,7 +569,7 @@
         0
     }</span>
 
-    <span class="fragment" data-fragment-index="3">fn add(&self, p: &Self) -> Self {
+    <span class="fragment" data-fragment-index="3">fn combine(&self, p: &Self) -> Self {
         self + p
     }</span>
   }
@@ -654,7 +640,7 @@
     fn x(&self) -> u32 { self.x }
     fn y(&self) -> u32 { self.y }
 
-    fn new(&self, x: u32, y: u32) -> Self {
+    fn init(&self, x: u32, y: u32) -> Self {
       YPoint { x, y }
     }
   }
@@ -671,17 +657,17 @@
             <pre><code data-noescape class="Rust">
   struct YPointColore { p: YPoint, c: u32 }
 
-  impl Point for YPointColore {
-    fn x(&self) -> u32 { self.p.x }
-    fn y(&self) -> u32 { self.p.x }
-    fn new(&self, x: u32, y: u32) -> Self {
-      YPointColore { p: YPoint { x, y }, c: self.c() }
-    }
-  }
-
   impl PointColore for YPointColore {
     fn c(&self) -> u32 { self.c }
   }
+
+  <span class="fragment">impl Point for YPointColore {
+    fn x(&self) -> u32 { self.p.x }
+    fn y(&self) -> u32 { self.p.y }
+    fn init(&self, x: u32, y: u32) -> Self {
+      YPointColore { p: YPoint { x, y }, c: self.c() }
+    }
+  }</span>
             </code></pre>
 
         </section>
@@ -748,9 +734,9 @@
       method x = x
       method y = y
 
-      method init x y = {< x = x ; y = y >}
-      method move dx dy = self#init (x + dx) (y + dy)
-      method equal (p:'self) = x = p#x && y = p#y
+      <span class="fragment">method init x y = {< x = x ; y = y >}</span>
+      <span class="fragment">method move dx dy = self#init (x + dx) (y + dy)</span>
+      <span class="fragment">method equal (p:'self) = x = p#x && y = p#y</span>
     end
             </code></pre>
         </section>
@@ -769,10 +755,13 @@
       val c = c
       method c = c
 
-      method init x y = {< x = x ; y = y; c = c >}
-      method equal (p:'self) = c = p#c && super#equal p
+      <span class="fragment">method init x y = {< x = x ; y = y; c = c >}</span>
+      <span class="fragment">method equal (p:'self) = c = p#c && super#equal p</span>
     end
             </code></pre>
+
+
+
         </section>
 
         <!-- ####################### -->
@@ -795,42 +784,86 @@
 
         <section>
 
-            <h3> Conclusion </h3>
+            <h3> Sous typage: nominal vs. structurel</h3>
 
             <ul>
-                <li class="fragment" style="font-size: 70%"> Sous typage Nominal et héritage <br>
-                    Relâchement au niveau formel concernant la contravariance <br>
-                    Limitation dans l'usage du type de self dans le code <br>
-                    Augmentation de l'ensemble des expressions (cf. Swift)
-                    <br><br>
+                <li style="font-size: 80%" class="fragment"> Nominal: vérifier via la liste des ancêtres </li>
+                <li style="font-size: 80%" class="fragment"> Structurel: vérifier via la liste des membres</li>
+            </ul>
+        </section>
+
+        <!-- ####################### -->
+
+        <section>
+
+            <h3> Cas du sous typage ... des types fonctionnels </h3>
+
+            <img class="fragment" src="images/subtype-fun.png" width="60%">
+
+            <p style="font-size: 70%" class="fragment remark">
+                Contravariance du paramètre et covariance du résultat </p>
+
+            <ul>
+                <li style="font-size: 70%" class="fragment">
+                    <a href="http://lucacardelli.name/Papers/OnUnderstanding.A4.pdf">
+                       On Understanding Types, Data Abstraction, and Polymorphism
+                    </a>
+                    <br> L. Cardelli et P. Wegner (1985)
                 </li>
-                <li class="fragment" style="font-size: 70%"> Sous typage structurel et héritage <br>
-                    Repose sur le modèle formel <br>
-                    Aucune limitation dans l'usage <br>
-                    Un point coloré n'est pas un point DOT
+                <li style="font-size: 70%" class="fragment">
+                    <a href="https://en.wikipedia.org/wiki/Liskov_substitution_principle">
+                        Liskov substitution principle
+                    </a>
+                    B. Liskov (1987)
+                </li>
+                <li style="font-size: 70%" class="fragment">
+                    <a href="http://www.cs.utexas.edu/~wcook/papers/InheritanceSubtyping90/CookPOPL90.pdf">
+                        Inheritance is not Subtyping
+                    </a>
+                    W. Cook, W. Hill et P. Canning (1990)
+                </li>
+                <li style="font-size: 70%" class="fragment">
+                    <a href="https://link.springer.com/book/10.1007/978-1-4419-8598-9">
+                        "A Theory of Objects"</a> M. Abadi et L. Cardelli (1996)
                 </li>
             </ul>
 
-            <br><br>
-
-            <p style="font-size: 70%" class="remark fragment"> Héritage vs. Composition </p>
-
         </section>
 
         <!-- ####################### -->
 
         <section>
 
-            <h3> Références </h3>
+            <h3> Conclusion </h3>
 
-            TODO
+            <ul>
+                <li class="fragment" style="list-style-type:square;font-size: 70%">
+                    <b>Typage dynamique, sous typage Nominal et héritage</b> <br>
+                    Relâchement au niveau formel concernant la contravariance <br>
+                    &check; Limitation dans l'usage du type de self dans le code <br>
+                    &check; Augmentation de l'ensemble des expressions
+                    <br><br>
+                </li>
+                <li class="fragment" style="list-style-type:square;font-size: 70%">
+                    <b>Typage dynamique, sous typage structurel et héritage</b> <br>
+                    Repose sur le modèle formel <br>
+                    &check; Aucune limitation dans l'usage <br>
+                    &check; Un point coloré n'est pas un point DOT
+                    <br><br>
+                </li>
+                <li class="fragment" style="list-style-type:square;font-size: 70%">
+                    <b>Héritage vs. Composition</b>
+                </li>
+            </ul>
+
 
         </section>
 
         <!-- ####################### -->
 
         <section>
-            <h3> Dynamic typing of the current object </h3>
+            <h3> Typage dynamique de l'objet courant </h3>
+
             <br>
             <p><img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/photo.png">
                 &nbsp; <a style="font-size:30px" href="http://twitter.com/dplaindoux">@dplaindoux</a></p>
@@ -851,12 +884,13 @@
 
         <section>
 
-<pre><code class="scala">
+            <h4> Self type concept in Scala </h4>
+
+            <pre><code class="scala">
   trait C { self: T =>
     ...
   }
-
-</code></pre>
+            </code></pre>
 
             <ul>
                 <li style="font-size: 70%" class="fragment"> Restrict the type of this to a proper subtype of the
@@ -870,8 +904,12 @@
 
         <section>
 
-<pre><code data-noescape class="scala">
-  trait Point[T <: Point[T]] { <span class="fragment">this: T =></span>
+            <h4> Scala :: Définition du trait Point </h4>
+
+            <pre><code data-noescape class="scala">
+  trait Point[T <: Point[T]] {
+    <span class="fragment">this: T =></span>
+
     val x, y: Int
 
     def init(x: Int, y: Int): T
@@ -886,7 +924,9 @@
 
         <section>
 
-<pre><code class="scala">
+            <h4> Scala :: Définition du trait PointColore </h4>
+
+            <pre><code class="scala">
   trait PointColore[T <: PointColore[T]] extends Point[T] {
                          this: T=>
 
@@ -903,7 +943,10 @@
 
         <section>
 
-<pre><code class="scala">
+            <h4> Scala :: Définition des classes YPoint et YPointColore </h4>
+
+
+            <pre><code class="scala">
   case class YPoint(x: Int, y: Int)
     extends Point[YPoint] {
 
@@ -912,14 +955,7 @@
   }
 
 </code></pre>
-
-        </section>
-
-        <!-- ####################### -->
-
-        <section>
-
-<pre><code class="scala">
+            <pre><code class="scala">
   case class YPointColore(x: Int, y: Int, c: Int)
     extends PointColore[YPointColore] {
 
@@ -929,19 +965,6 @@
 
 </code></pre>
 
-        </section>
-
-        <!-- ####################### -->
-
-        <section>
-            <pre><code class="scala">
-  def equal[P <: Point[P]] (p1: P, p2: P)=p1.equal(p2)
-      </code></pre>
-
-            <p style="font-size: 70%" class="fragment remark"><tt>YPoint &le; Point[YPoint]</tt></p>
-            <p style="font-size: 70%" class="fragment remark"><tt>YPointColore &le; Point[YPointColore]</tt></p>
-            <p style="font-size: 70%" class="warning fragment"> No <b>explicit</b> relationship between
-                <tt>YPointColore</tt> and <tt>YPoint</tt></p>
         </section>
 
         <!-- ####################### -->

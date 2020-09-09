@@ -45,5 +45,5 @@ fn main() {
     let p1 = YPointColore { p: YPoint { x: 0, y: 0 }, c: 0 };
     let p2 = p1.move_it(0, 0);
 
-    let _ = p1.equal(&p2); // Ambiguité lors de la compilation
+    // let _ = p1.equal(&p2); // Ambiguité lors de la compilation
 }

@@ -271,8 +271,7 @@
       </code></pre>
 
             <p style="font-size: 70%" class="warning fragment">
-                <tt>YPointColore</tt> ne peut hériter de <tt>YPoint</tt> <br>
-                Ne peut implémenter Point&lt;YPoint> et Point&lt;YPointColore>
+                Ne peut implémenter <code>Point&lt;YPoint></code> et <code>Point&lt;YPointColore></code>
             </p>
 
         </section>
@@ -295,8 +294,8 @@
  }
       </code></pre>
 
-            <p style="font-size: 70%" class="fragment remark"><tt>YPoint est un sous type de Point&lt;YPoint></tt>
-                <br> <tt>YPointColore est un sous type Point&lt;YPointColore></tt></p>
+            <p style="font-size: 70%" class="warning fragment"> Pas de relation <b>explicite</b> entre
+                <code>YPointColore</code> et <code>YPoint</code></p>
 
         </section>
 
@@ -304,7 +303,7 @@
 
         <section>
 
-            <h4> Kotlin :: Usages </h4>
+            <h4> Kotlin :: Usages ... </h4>
 
             <pre><code data-noescape class="kotlin">
  fun &lt;P : Point&lt;P>> List&lt;P>.move(dx: Int, dy: Int) = this.map {
@@ -322,8 +321,6 @@
  }</span>
       </code></pre>
 
-            <p style="font-size: 70%" class="warning fragment"> Pas de relation <b>explicite</b> entre
-                <tt>YPointColore</tt> et <tt>YPoint</tt></p>
         </section>
 
         <!-- ####################### -->
@@ -712,11 +709,9 @@
 
             <h3> Self type in OCaml </h3>
 
-            <p><tt>object (self : ’self) ··· end</tt></p>
+            <p><code class="fragment Ocaml">object (self : ’self) ··· end</code></p>
 
-            <p><tt>a :> b</tt></p>
-
-            <p class="fragment remark"> Structural subtyping </p>
+            <p><code class="fragment Ocaml">a :> b</code></p>
 
         </section>
 
@@ -796,7 +791,7 @@
 
         <section>
 
-            <h3> Cas du sous typage ... des types fonctionnels </h3>
+            <h3> A propos du sous typage </h3>
 
             <img class="fragment" src="images/subtype-fun.png" width="60%">
 
@@ -806,19 +801,19 @@
             <ul>
                 <li style="font-size: 70%" class="fragment">
                     <a href="http://lucacardelli.name/Papers/OnUnderstanding.A4.pdf">
-                       On Understanding Types, Data Abstraction, and Polymorphism
+                       "On Understanding Types, Data Abstraction, and Polymorphism"
                     </a>
                     <br> L. Cardelli et P. Wegner (1985)
                 </li>
                 <li style="font-size: 70%" class="fragment">
                     <a href="https://en.wikipedia.org/wiki/Liskov_substitution_principle">
-                        Liskov substitution principle
+                        "Liskov substitution principle"
                     </a>
                     B. Liskov (1987)
                 </li>
                 <li style="font-size: 70%" class="fragment">
                     <a href="http://www.cs.utexas.edu/~wcook/papers/InheritanceSubtyping90/CookPOPL90.pdf">
-                        Inheritance is not Subtyping
+                        "Inheritance is not Subtyping"
                     </a>
                     W. Cook, W. Hill et P. Canning (1990)
                 </li>
@@ -848,7 +843,7 @@
                     <b>Typage dynamique, sous typage structurel et héritage</b> <br>
                     Repose sur le modèle formel <br>
                     &check; Aucune limitation dans l'usage <br>
-                    &check; Un point coloré n'est pas un point DOT
+                    &check; Un point coloré n'est pas un point
                     <br><br>
                 </li>
                 <li class="fragment" style="list-style-type:square;font-size: 70%">
@@ -864,9 +859,9 @@
         <section>
             <h3> Typage dynamique de l'objet courant </h3>
 
-            <br>
             <p><img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/photo.png">
                 &nbsp; <a style="font-size:30px" href="http://twitter.com/dplaindoux">@dplaindoux</a></p>
+
         </section>
 
 

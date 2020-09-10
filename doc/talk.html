@@ -83,16 +83,16 @@
             <h3> Remerciements </h3>
 
             <p style="font-size:70%">
-                <img style="vertical-align: middle;" class="plain" width="35%" src="images/logo_color_text.png">
+                <img style="vertical-align: middle;" class="plain" width="40%" src="images/logo_color_text.png">
             </p>
 
-            <p style="font-size:70%">
-                <img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/xavier.png">
-                Xavier Van de Woestyne </p>
-
-            <p style="font-size:70%">
+            <p class="fragment" style="font-size:70%">
                 <img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/alessio.jpeg">
                 Alessio Coltellacci</p>
+
+            <p class="fragment" style="font-size:70%">
+                <img style="vertical-align: middle;" class="plain img-circle" width="5%" src="images/xavier.png">
+                Xavier Van de Woestyne </p>
 
         </section>
 
@@ -106,9 +106,10 @@
  interface Point {
   var x: Int; var y: Int
 
-  fun move(dx: Int, dy: Int): Point {
-    this.x += dx; this.y += dy; return this
-  }
+  <span class="fragment">fun move(dx: Int, dy: Int): Point {
+    this.x += dx; this.y += dy; // Procède par mutation
+    <span class="fragment">return this</span>
+  }</span>
  }
       </code></pre>
 
@@ -142,7 +143,7 @@
         <section>
             <h2> Part I </h2>
 
-            <h3>Langages sans le type de l'objet courant </h3>
+            <h3>Sans le type dynamique de l'objet courant </h3>
 
             <p> Etude de cas en Kotlin </p>
 
@@ -265,7 +266,7 @@
    override val c: Int
  ) : <span class="keyword">YPoint(x,y),</span> PointColore&lt;YPointColore> {
 
-  override fun init(x: Int, y: Int) = YPointColore(x, y, 0)
+  override fun init(x: Int, y: Int) = YPointColore(x, y, c)
 
  }
       </code></pre>
@@ -289,7 +290,7 @@
    override val c: Int
  ) : PointColore&lt;YPointColore> {
 
-  override fun init(x: Int, y: Int) = YPointColore(x, y, 0)
+  override fun init(x: Int, y: Int) = YPointColore(x, y, c)
 
  }
       </code></pre>
@@ -341,7 +342,7 @@
 
             <h2> Part II </h2>
 
-            <h3> Langages avec le type de l'objet courant </h3>
+            <h3> Avec le type dynamique de l'objet courant </h3>
 
         </section>
 
@@ -394,7 +395,7 @@
         <!-- ####################### -->
 
         <section>
-            <h3> a new ... <span style="text-transform: capitalize;">Self</span></h3>
+            <h3> self and init constructor </h3>
 
             <pre><code data-noescape class="swift">
   class Counter {
@@ -472,11 +473,11 @@
     var c : Int { get }
   }
 
-  extension PointColore {
+  <span class="fragment">extension PointColore {
     func equal(p:Self) -> Bool {
       return c == p.c && x == p.x && y == p.y
     }
-  }
+  }</span>
     </code></pre>
 
         </section>
@@ -592,8 +593,8 @@
   trait Point {
     fn x(&self) -> u32;
     fn y(&self) -> u32;
-
     <span class="fragment">fn init(&self, x: u32, y: u32) -> Self;</span>
+
     <span class="fragment">fn move_it(&self, dx: u32, dy: u32) -> Self
       where Self: std::marker::Sized {
       self.init(self.x() + dx, self.y() + dy)
@@ -711,7 +712,7 @@
 
             <p><code class="fragment Ocaml">object (self : ’self) ··· end</code></p>
 
-            <p><code class="fragment Ocaml">a :> b</code></p>
+            <p><code class="fragment Ocaml">expression :> type</code></p>
 
         </section>
 
@@ -768,7 +769,7 @@
             <pre><code data-noescape class="OCaml">
   let p  = new point 1 2
   let pc = new point_colore 1 2 3
-  <span class="fragment">let _  = (pc :> p) &#x274C; (* point &nleq; point_colore *)</span>
+  <span class="fragment">let _  = (pc :> point) &#x274C; (* point &nleq; point_colore *)</span>
             </code></pre>
 
             <p style="font-size: 70%" class="remark fragment"> Sous typage structurel </p>
